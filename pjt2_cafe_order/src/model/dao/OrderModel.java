@@ -174,6 +174,7 @@ public class OrderModel implements OrderDao{
 
 
 	}
+
 	//선택된 메뉴의 가격과 메뉴 이름,재고 가져오기.
 	public Order getSelectedInfo(int menuNo) throws Exception{
 		//ArrayList<Order> menuInfo =new ArrayList<Order> ();

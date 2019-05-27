@@ -1,35 +1,35 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
+import javax.swing.*;
+//import javax.swing.JButton;
+//import javax.swing.JComboBox;
+//import javax.swing.JLabel;
+//import javax.swing.JOptionPane;
+//import javax.swing.JPanel;
+//import javax.swing.JScrollPane;
+//import javax.swing.JTable;
+//import javax.swing.JTextArea;
+//import javax.swing.JTextField;
+//import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 
 import model.dao.OrderModel;
-import model.dao.StockModel;
+
 import model.vo.Order;
-import model.vo.Stock;
-import view.StockView.MyHdlr;
-import view.StockView.StockTableModel;
+
 
 
 public class OrderView extends JPanel {
@@ -58,6 +58,7 @@ public class OrderView extends JPanel {
 	int[] j = new int[btMenu.length];
 	int mile_cnt = 0;
 	int cou_cnt = 0;
+	int btO_cnt = 0;
 
 	//#########################
 	//constructor method
@@ -89,10 +90,30 @@ public class OrderView extends JPanel {
 		bUsage.addActionListener(myhdlr);
 		bApply.addActionListener(myhdlr);
 		bPay.addActionListener(myhdlr);
+
 		for (int i = 0; i < btMenu.length; i++) {
 			btMenu[i].addActionListener(myhdlr);
 		}
 		//
+
+		tableOrder.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+				// 해당 열이 선택 될 경우,
+				int row = tableOrder.getSelectedRow();
+				ArrayList cancelMenu = new ArrayList();
+		
+				cancelMenu.add((String)tableOrder.getValueAt(row, 0));
+				cancelMenu.add((String)tableOrder.getValueAt(row, 1));
+				cancelMenu.add((String)tableOrder.getValueAt(row, 2));
+				JOptionPane.showMessageDialog(null, cancelMenu+"를 취소합니다.");
+
+				cancelSelected(cancelMenu);
+
+			}
+		});
 
 	}
 	class MyButtonHdlr implements ActionListener{
@@ -102,30 +123,26 @@ public class OrderView extends JPanel {
 			Object o = e.getSource();
 
 
-			//	insert()//주문이벤트
-			//	proctadd()//수량추가이벤트
-			//	result()//결제버튼이벤트
-			//	cancel()//취소버튼이벤트
-
-			//	search() // 주문내역 조회
-			//	select() // 회원 전화번호로 정보 가져오기 
-			//	update() //회원 전화번호 얻어와서 데이터 수정
 
 			//버튼 별 이벤트 
 			//전화번호 엔터.검색버튼 클릭시
 			if(o==tfOrderTel || o==bTel){  
 				System.out.println("이벤트확인");
-				//clearData();
+
+				cancelSelect();
 				cusInfo();
+
 
 				// 콤보박스 선택 시,매장/테이크아웃 정보 읽어서 db로 보내주기.
 			}else if(o==bOrd) {
+				 btO_cnt++;
+				 
 				if(tfOrderTel.getText().contentEquals("")) {
 					JOptionPane.showMessageDialog(null, "전화번호를 입력하세요");
 				}else {
 					getSum();
 				}
-
+				getSum();
 				//System.out.println("주문이벤트확인");
 
 				// 취소 클릭 시 전체 취소
@@ -134,16 +151,13 @@ public class OrderView extends JPanel {
 				//배열 초기화
 				cancelSelect();
 
-				for (int i = 0; i < btMenu.length; i++) {
-					j[i]=0;
-				}
 
 				//System.out.println("취소이벤트확인");
 
 				//마일리지 사용 시 전체 가격에서 차감, 고객 마일리지 차감	
 			}else if(o==bUsage) {
 				//System.out.println("사용이벤트");
-				
+
 				//한번만 적용되도록.
 				mile_cnt++;
 				if(mile_cnt == 1) {
@@ -151,32 +165,33 @@ public class OrderView extends JPanel {
 				}else if( mile_cnt > 1){
 					JOptionPane.showMessageDialog(null, "이미 적용되었습니다.");
 				}
-				
-				
+
+
 
 				// 쿠폰번호 적용 시 할인율 받아와서 가격 적용	
 			}else if(o==bApply) {
 				//System.out.println("적용이벤트확인");
 				cou_cnt++;
+
 				if(tfCupon.getText()=="") {
 					JOptionPane.showMessageDialog(null, "쿠폰번호를 확인하세요");
 				}
-				
+
 				if (cou_cnt == 1) {
 					getCoupon();
 				}else if( mile_cnt > 1){
 					JOptionPane.showMessageDialog(null, "이미 적용되었습니다.");
 				}
-				
-				
+
+
 				//결제금액 적용 시 최종 결제 가격 db전송 
 			}else if(o==bPay) {
 
 				OrderSelectedItem();
 				updateMile();
 				clearAll();
-				
-				
+
+
 				for (int i = 0; i < btMenu.length; i++) {
 					j[i]=0;
 				}
@@ -188,17 +203,29 @@ public class OrderView extends JPanel {
 			for (int i = 0; i < btMenu.length; i++) {
 
 				if (o==btMenu[i]) {
-
+					//버튼 클릭 수 카운트
 					j[i]++;
 
-					if(j[i] == 1) {
-						Olist.add(getSelectedMenu(i,j[i]));
+					int[] stockCnt = checkStock() ;
 
-					}else if(j[i] >1) {
-						Olist.remove(getSelectedMenu(i,j[i]-1));
-						Olist.add(getSelectedMenu(i,j[i]));
+
+					if (j[i]>stockCnt[i]) {
+						JOptionPane.showMessageDialog(null, "수량이 부족합니다.");
+						j[i]--;
+					}else if(j[i]<=stockCnt[i]) {
+						if(j[i] == 1) {
+							Olist.add(getSelectedMenu(i,j[i]));
+
+							//두번이상 클릭되면 앞에 주문내역리스트에서 제외하고 추가된 수량으로 다시 입력해준다.
+						}else if(j[i] >1) {
+							Olist.remove(getSelectedMenu(i,j[i]-1));
+							Olist.add(getSelectedMenu(i,j[i]));
+						}
 					}
 
+					if( btO_cnt >1) {
+						getSum();
+					}
 
 
 					//System.out.println(Olist);
@@ -216,13 +243,6 @@ public class OrderView extends JPanel {
 		}
 
 	}
-
-
-
-
-	//JTable 오더에서 클릭했을 때 마우스 이벤트 줌
-
-
 
 
 
@@ -280,7 +300,7 @@ public class OrderView extends JPanel {
 		labelCupon = new JLabel("쿠폰번호");
 		labelTotal = new JLabel("총금액");
 		labelTotalWrite = new JLabel();
-
+		labelTotalWrite.setHorizontalAlignment(JLabel.RIGHT);
 
 
 		//*************************************
@@ -387,8 +407,30 @@ public class OrderView extends JPanel {
 
 
 
-	// 주문 버튼 클릭 시  , 주문정보가  db로 넘어가고, 총 가격이 계산된다.
 
+
+	// 재고 수량 체크 .
+	public int[] checkStock() {
+
+		int[] stockCnt=new int[btMenu.length];
+		Order cnt = new Order();
+		try {
+			for (int i = 0; i < btMenu.length; i++) {
+				cnt = ord.getSelectedInfo(i+1);
+				stockCnt[i] = cnt.getmSCount();
+				System.out.println(stockCnt[i]);
+			}
+
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "재고수량 조회 불가 :"+e.getMessage());
+		}
+		return stockCnt;
+
+	}
+
+
+
+	// 주문 버튼 클릭 시  , 주문정보가 db로 넘어가고, 총 가격이 계산된다.
 	public void OrderSelectedItem() {
 
 		SimpleDateFormat DateFormat = new SimpleDateFormat ( "yyyy.MM.dd HH:mm:ss", Locale.KOREA );
@@ -488,16 +530,39 @@ public class OrderView extends JPanel {
 
 	}
 
-	// 선택 취소.
+	//테이블에서 선택한 주문 list 삭제하기
+	public void cancelSelected(ArrayList cancelList) {
+
+		Olist.remove(cancelList);
+		// 화면 초기화
+		tbModelOrder.fireTableDataChanged();
+		System.out.println(Olist);
+		for (int i = 0; i < btMenu.length; i++) {
+			if(cancelList.get(0).equals(btMenu[i].getText())) {
+				j[i]=0;
+			}
+
+		}
+		getSum();
+
+
+	}
+
+	//취소버튼 클릭 시 해당 행 주문리스트에서 삭제
 	public void cancelSelect() {
 
 		Olist.clear(); // 리스트 초기화.
 		tbModelOrder.data= Olist; // 화면 초기화
 		tbModelOrder.fireTableDataChanged();
 		labelTotalWrite.setText(null);
+		for (int i = 0; i < btMenu.length; i++) {
+			j[i]=0;
+		}
+		
 
 	}
-	
+
+	//화면 초기화
 	public void clearAll() {
 		cancelSelect();
 		tfOrderTel.setText(null);
@@ -539,11 +604,12 @@ public class OrderView extends JPanel {
 			e.printStackTrace();
 		}
 	}
+
 	// 마일리지 db에 업데이트
 	public void updateMile() {
 
 		String ctel=tfOrderTel.getText();
-		
+
 		int minus_mile = Integer.parseInt(tfMiles.getText()) ;
 		int plus_mile = Integer.parseInt(labelTotalWrite.getText()) /10;
 
@@ -556,8 +622,8 @@ public class OrderView extends JPanel {
 		}
 
 	}
-	
-	// 사용 마일리지 text에 반영
+
+	// 사용 마일리지 최종가격에 반영
 	public void minusMile() {
 
 		int minus_mile = Integer.parseInt(tfMiles.getText()) ;
@@ -565,6 +631,7 @@ public class OrderView extends JPanel {
 		labelTotalWrite.setText(String.valueOf(price-minus_mile));
 	}
 
+	// 쿠폰 할인율 받아와서 최종가격에 반영
 	public void getCoupon() {
 		String coupno = tfCupon.getText();
 		int total_price = Integer.parseInt(labelTotalWrite.getText());
@@ -589,6 +656,10 @@ public class OrderView extends JPanel {
 
 		labelTotalWrite.setText(Integer.toString(sum));
 	}
+
+
+
+
 
 	//테이블 모델.
 	class OrderTableModel extends AbstractTableModel{

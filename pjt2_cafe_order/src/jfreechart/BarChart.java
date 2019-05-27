@@ -70,7 +70,7 @@ public class BarChart {
 		while(rs.next())
 		{
 //			dataSet.addValue(rs.getInt("tot"), "월별주문량", rs.getString("month"));
-			dataSet.addValue(rs.getInt("value"), "월별주문량", rs.getString("name"));
+			dataSet.addValue(rs.getInt("value"), "주문량", rs.getString("name"));
 		}
 
 		rs.close();
