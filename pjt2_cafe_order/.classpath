@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="lib/JTattoo.jar"/>
 	<classpathentry kind="lib" path="lib/liquidlnf.jar"/>
 	<classpathentry kind="lib" path="lib/quaqua.jar"/>
-	<classpathentry kind="lib" path="D:/mywork/java/workspace/JDBC/libs/jcommon-1.0.23.jar"/>
-	<classpathentry kind="lib" path="D:/mywork/java/workspace/JDBC/libs/jfreechart-1.0.19.jar"/>
+	<classpathentry kind="lib" path="D:/mywork/git_java/JDBC/libs/jcommon-1.0.23.jar"/>
+	<classpathentry kind="lib" path="D:/mywork/git_java/JDBC/libs/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -7,16 +7,16 @@ import org.jfree.chart.JFreeChart;
 
 public class MyFrame extends JFrame {
 
-	// ìš°ë¦¬ê°€ ë§Œë“œëŠ” í™”ë©´ 
+	// ¿ì¸®°¡ ¸¸µå´Â È­¸é 
 	MyFrame(){
 		 // *******************************************************
-		 ChartA demo = new ChartA();   		 // (1) ì •í•´ì§„ ê°’ìœ¼ë¡œ ì°¨íŠ¸
-		 //ChartB demo = new ChartB();			 // (2) DBì—ì„œ ê°€ì ¸ì˜¨ ê°’ìœ¼ë¡œ ì°¨íŠ¸ 
+		 ChartA demo = new ChartA();   		 // (1) Á¤ÇØÁø °ªÀ¸·Î Â÷Æ®
+		 //ChartB demo = new ChartB();			 // (2) DB¿¡¼­ °¡Á®¿Â °ªÀ¸·Î Â÷Æ® 
          JFreeChart chart = demo.getChart();     
          ChartPanel chartPanel=new ChartPanel(chart); 
-         				// JFreeChartëŠ” ChartPanelì´ë‚˜ ChartFrameì—ë§Œ ë¶™ì¼ ìˆ˜ ìˆë‹¤.
-         				// ì°¨íŠ¸ë§Œ ì¶œë ¥í•˜ë ¤ë©´ ChartFrameì— ë¶™ì—¬ì„œ ë°”ë¡œ ì¶œë ¥í•˜ê±°ë‚˜
-         				// ê¸°ì¡´ì˜ í™”ë©´ì— ë³´ì´ê²Œ í•˜ë ¤ë©´ ChartPanelì— ë¶™ì´ê³  ë‹¤ì‹œ ìš°ë¦¬ í™”ë©´ JPanelì— ë¶™ì¸ë‹¤. 
+         				// JFreeChart´Â ChartPanelÀÌ³ª ChartFrame¿¡¸¸ ºÙÀÏ ¼ö ÀÖ´Ù.
+         				// Â÷Æ®¸¸ Ãâ·ÂÇÏ·Á¸é ChartFrame¿¡ ºÙ¿©¼­ ¹Ù·Î Ãâ·ÂÇÏ°Å³ª
+         				// ±âÁ¸ÀÇ È­¸é¿¡ º¸ÀÌ°Ô ÇÏ·Á¸é ChartPanel¿¡ ºÙÀÌ°í ´Ù½Ã ¿ì¸® È­¸é JPanel¿¡ ºÙÀÎ´Ù. 
          add(chartPanel);
          setSize(800,400); 
          setVisible(true);

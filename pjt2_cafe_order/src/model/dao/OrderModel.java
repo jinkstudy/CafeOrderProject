@@ -13,10 +13,15 @@ import model.vo.Stock;
 
 public class OrderModel implements OrderDao{
 	//1. 드라이버로딩
+//	String driver = "oracle.jdbc.driver.OracleDriver";
+//	String url = "jdbc:oracle:thin:@127.0.0.1:1521:orcl";
+//	String user = "lsh";
+//	String pass = "lsh";
+	
 	String driver = "oracle.jdbc.driver.OracleDriver";
 	String url = "jdbc:oracle:thin:@192.168.0.117:1521:orcl";
-	String user = "jink";
-	String pass = "1234";
+	String user= "jink";
+	String pass="1234";
 
 	//2. 연결객체 얻어오기
 	Connection con = null;

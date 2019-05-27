@@ -5,9 +5,14 @@ import java.util.*;
 
 public class Database {
 
-	String URL = "jdbc:oracle:thin:@192.168.0.117:1521:orcl";
-	String USER ="jink";
-	String PASS = "1234";
+//	String driver = "oracle.jdbc.driver.OracleDriver";
+	String URL = "jdbc:oracle:thin:@127.0.0.1:1521:orcl";
+	String USER = "lsh";
+	String PASS = "lsh";
+	
+//	String URL = "jdbc:oracle:thin:@192.168.0.117:1521:orcl";
+//	String USER ="jink";
+//	String PASS = "1234";
 
 	public ArrayList<ArrayList> getData() {
 
@@ -35,7 +40,7 @@ public class Database {
 			stmt.close();
 			con.close();
 		} catch(Exception ex){
-			System.out.println("¿¡·¯ : " + ex.getMessage() );
+			System.out.println("ï¿½ï¿½ï¿½ï¿½ : " + ex.getMessage() );
 		}
 		return data;
 	}

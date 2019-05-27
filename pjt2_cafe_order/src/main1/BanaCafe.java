@@ -2,6 +2,7 @@ package main1;
 import java.awt.*;
 import javax.swing.*;
 
+import view.AggView;
 import view.CustomerView;
 import view.OrderView;
 import view.StockView;
@@ -17,6 +18,7 @@ public class BanaCafe  extends JFrame {
 	OrderView order;
 	CustomerView customer;
 	StockView stock;
+	AggView agg;
 
 	public BanaCafe(){
 
@@ -24,6 +26,7 @@ public class BanaCafe  extends JFrame {
 		order = new OrderView();
 		customer = new CustomerView();
 		stock = new StockView();
+		agg = new AggView();
 		try {
 			// 1. 자바 내장 룩앤필
 			//UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
@@ -46,7 +49,7 @@ public class BanaCafe  extends JFrame {
 		pane.addTab("주문화면", order );
 		pane.addTab("고객정보", customer);
 		pane.addTab("재고관리", stock );
-		//pane.addTab("통계", rent );
+		pane.addTab("통계", agg );
 
 		pane.setSelectedIndex(0);  //첫 화면
 
@@ -62,7 +65,7 @@ public class BanaCafe  extends JFrame {
 	public static void main(String[] args) {
 
 		new BanaCafe();
-
+//this
 
 	}
 }
