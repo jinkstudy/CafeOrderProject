@@ -51,7 +51,7 @@ public class BanaCafe  extends JFrame {
 		pane.addTab("재고관리", stock );
 		pane.addTab("통계", agg );
 
-		pane.setSelectedIndex(0);  //첫 화면
+		pane.setSelectedIndex(2);  //첫 화면
 
 		// 화면크기지정
 		add("Center", pane );

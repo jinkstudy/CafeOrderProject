@@ -13,11 +13,7 @@ import model.vo.Stock;
 
 public class OrderModel implements OrderDao{
 	//1. 드라이버로딩
-//	String driver = "oracle.jdbc.driver.OracleDriver";
-//	String url = "jdbc:oracle:thin:@127.0.0.1:1521:orcl";
-//	String user = "lsh";
-//	String pass = "lsh";
-	
+
 	String driver = "oracle.jdbc.driver.OracleDriver";
 	String url = "jdbc:oracle:thin:@192.168.0.117:1521:orcl";
 	String user= "jink";
@@ -204,7 +200,7 @@ public class OrderModel implements OrderDao{
 		PreparedStatement st1 = con.prepareStatement(sql1);
 		
 		
-		st1.setString(1,list.get(1).toString());
+		st1.setString(1,list.get(0).toString());
 		st1.executeUpdate(); 
 		
 		String sql = "Insert into order_cus(ono,oorderno,otime,otype,ctel,menuno,ocount,ototalprice)"
@@ -231,8 +227,9 @@ public class OrderModel implements OrderDao{
 			st.setInt(6,or.getmOcount());
 			st.setInt(7,or.getmPrice());
 			
-			System.out.println(or.getmOcount()+" /" + or.getmPrice());
+			System.out.println(or.getoMenuNo()+"/" + or.getmOcount()+" /" + or.getmPrice());
 			System.out.println(or.getOtype());
+			System.out.println(list.get(0).toString());
 			
 			st.executeUpdate(); 
 		}
@@ -287,6 +284,38 @@ public class OrderModel implements OrderDao{
 
 
 		return or;
+	}
+	
+	// 재고 수량 조정하기.
+	public void modifyMenuCnt(ArrayList<Order> list) throws Exception {
+		// 2. Connection 연결객체 얻어오기
+		Connection con = DriverManager.getConnection(url, user ,pass);
+       // 3. sql 문장 만들기
+		String sql =null;
+		
+		
+			sql = "UPDATE menu SET mcount = mcount-?  WHERE menuno = ? ";
+		
+		
+
+		PreparedStatement st = con.prepareStatement(sql);
+		
+		
+		for(Order or : list) {
+			//System.out.println(vo[i].getsOrderNo());
+			st.setInt(1, or.getmOcount());
+			st.setInt(2, or.getoMenuNo());
+			System.out.println(or.getoMenuNo() + "/" +or.getmSCount());
+			
+			
+			st.executeUpdate(); 
+		}
+		
+
+		st.close();
+		con.close();
+
+		
 	}
 
 

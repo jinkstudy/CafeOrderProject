@@ -121,7 +121,7 @@ public class OrderView extends JPanel {
 				// 콤보박스 선택 시,매장/테이크아웃 정보 읽어서 db로 보내주기.
 			}else if(o==bOrd) {
 
-
+				getSum();
 				//System.out.println("주문이벤트확인");
 
 				// 취소 클릭 시 전체 취소
@@ -426,6 +426,7 @@ public class OrderView extends JPanel {
 			//System.out.println(list.get(1));
 
 			ord.insertOrList(list);
+			ord.modifyMenuCnt(list);
 
 
 
@@ -515,6 +516,20 @@ public class OrderView extends JPanel {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	public void getSum()
+    {
+        int sum = 0;
+        for(int i = 0; i < tableOrder.getRowCount(); i++)
+        {
+        String a =((String)(tableOrder.getValueAt(i, 2))).replaceAll("[^0-9]", "");
+            sum = sum + Integer.parseInt(a);
+        }
+        
+        labelTotalWrite.setText(Integer.toString(sum));
+    }
+	
 	class OrderTableModel extends AbstractTableModel{
 		ArrayList data = new ArrayList();
 

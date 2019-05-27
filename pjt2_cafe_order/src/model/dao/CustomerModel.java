@@ -10,11 +10,7 @@ import model.CustomerDao;
 
 public class CustomerModel implements CustomerDao {
 	// 1. 드라이버로딩
-//	String driver = "oracle.jdbc.driver.OracleDriver";
-////	String url = "jdbc:oracle:thin:@192.168.0.4:1521:orcl";
-//	String url = "jdbc:oracle:thin:@127.0.0.1:1521:orcl";
-//	String user = "lsh";
-//	String pass = "lsh";
+
 	String driver = "oracle.jdbc.driver.OracleDriver";
 	String url = "jdbc:oracle:thin:@192.168.0.117:1521:orcl";
 	String user= "jink";

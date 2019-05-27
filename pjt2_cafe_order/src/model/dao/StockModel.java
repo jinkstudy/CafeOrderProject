@@ -8,10 +8,7 @@ import model.vo.Stock;
 
 
 public class StockModel implements StockDao {
-//	String driver = "oracle.jdbc.driver.OracleDriver";
-//	String url ="jdbc:oracle:thin:@127.0.0.1:1521:orcl";
-//	String user = "lsh";
-//	String pass = "lsh";
+
 	
 	String driver = "oracle.jdbc.driver.OracleDriver";
 	String url = "jdbc:oracle:thin:@192.168.0.117:1521:orcl";
@@ -23,7 +20,7 @@ public class StockModel implements StockDao {
 	}
 
 
-
+	// 제품명 가져오기
 	public String[] getMname() throws Exception {
 		String[] mname=new String[9] ;
 
@@ -54,7 +51,8 @@ public class StockModel implements StockDao {
 
 		return mname;
 	}
-
+	
+	// 주문번호 리스트 가져오기 
 	public ArrayList<String> getOrderNoList() throws Exception {
 		ArrayList<String> orderNoList=new ArrayList<String>() ;
 
@@ -88,6 +86,8 @@ public class StockModel implements StockDao {
 
 
 	@Override
+	
+	// 주문번호로 조회 시 주문 수량 가져오기.
 	public ArrayList<Stock> getStOrderCnt(String sOrderno) throws Exception {
 
 		ArrayList<Stock> stOrderCnt = new ArrayList<Stock>();
@@ -131,14 +131,18 @@ public class StockModel implements StockDao {
 		return stOrderCnt;
 	}
 
+	//재고 수량 수정하기
 	public void modifyMenuCnt(ArrayList<Stock> list, int opt) throws Exception {
 		// 2. Connection 연결객체 얻어오기
 				Connection con = DriverManager.getConnection(url, user ,pass);
 		// 3. sql 문장 만들기
 				String sql =null;
 				
+				// 재고 추가
 				if(opt == 1) {
 					sql = "UPDATE menu SET mcount = mcount+?  WHERE menuno = ? ";
+					
+					//재고 취소
 				}else if (opt ==2) {
 					sql = "UPDATE menu SET mcount = mcount-?  WHERE menuno = ? ";
 				}
@@ -161,7 +165,7 @@ public class StockModel implements StockDao {
 		
 	}
 
-
+	//주문내역 db에 입력하기
 	@Override
 	public void insertSt(ArrayList<Stock> list) throws Exception {
 
@@ -198,6 +202,8 @@ public class StockModel implements StockDao {
 
 
 	}
+	
+	// 콤보박스 선택 시 선택내용에 따라서, 조회내역을 불러온다.
 	public ArrayList getSearchList(String opt, int optSearch) throws Exception {
 		ArrayList stSearchList = new ArrayList();
 		Connection	con = null;
@@ -207,7 +213,10 @@ public class StockModel implements StockDao {
 		// 2. 연결객체
 		con = DriverManager.getConnection(url, user ,pass);
 		//3. sql
+		// 주문내역을 클릭했을 시.
 		if(optSearch == 1) {
+			
+			//전체 인경우
 			if(opt.equals("전체")) {
 				String sql = "SELECT S.SORDERNO SORDERNO, M.MENUNAME MENUNAME, S.SCOUNT scount, s.eno eno, s.stime stime " + 
 						" FROM STOCK S INNER JOIN MENU M" + 
@@ -219,7 +228,8 @@ public class StockModel implements StockDao {
 				//4.전송객체
 				st = con.prepareStatement(sql);
 
-
+				
+				//주문번호로 조회인 경우,
 
 			} else {
 				String sql = "SELECT S.SORDERNO SORDERNO, M.MENUNAME MENUNAME, S.SCOUNT scount, s.eno eno, s.stime stime  "
@@ -241,12 +251,15 @@ public class StockModel implements StockDao {
 				list.add(rs.getString("MENUNAME"));
 				list.add(rs.getInt("scount"));
 				//list.add(rs.getString("eno"));
-				//list.add(rs.getString("stime"));
+				list.add(rs.getString("stime"));
 
 				stSearchList.add(list);
 
 			}
+			
+			//재고내역인 경우
 		}else if(optSearch == 2) {
+			//전체 인경우
 			if(opt.equals("전체")) {
 				String sql = "SELECT Menuno, menuname, mcount from menu" ;
 
@@ -255,10 +268,10 @@ public class StockModel implements StockDao {
 				st = con.prepareStatement(sql);
 
 
-
+				//재고명으로 조회하는 경우
 			} else {
 				String sql = "SELECT Menuno, menuname, mcount from menu where menuname = ? order by menuno";
-				//System.out.println(sql);
+				System.out.println(sql);
 
 				st = con.prepareStatement(sql);
 				st.setString(1,opt);
@@ -308,6 +321,8 @@ public class StockModel implements StockDao {
 
 
 	@Override
+	
+	//주문내역 삭제.
 	public void deleteSt(String sOrderNo) throws Exception {
 
 		// 2. Connection 연결객체 얻어오기
