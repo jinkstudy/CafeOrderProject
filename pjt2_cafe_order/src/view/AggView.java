@@ -25,8 +25,8 @@ import model.vo.Customer;
 
 public class AggView  extends JPanel {
 
-	JButton bt_cal = new JButton("기간별"); //전화번호 입력 버튼
-	JButton bt_menu = new JButton("메뉴별"); //마일리지 검색
+	JButton bt_cal = new JButton("일별 통계"); //일 통계 버튼
+	JButton bt_menu = new JButton("월별 통계"); //월 통계 버튼
 	
 	JPanel p_eChart = new JPanel();
 	JPanel p_wChart = new JPanel();
@@ -38,7 +38,7 @@ public class AggView  extends JPanel {
 	public AggView() {
 		addLayout();  //레이아웃
 		eventProc();  //이벤트처리
-		connectDB();
+		connectDB();  
 	}
 
 	public void connectDB(){
@@ -51,25 +51,23 @@ public class AggView  extends JPanel {
 
 	
 	public void addLayout(){
-		p_east.setLayout(new FlowLayout());
-		JPanel p_east_north = new JPanel();
-		JPanel p_east_center = new JPanel();
-		p_east_north.setLayout(new GridLayout(2,2));
-		p_east_north.add(bt_cal);
-		p_east_north.add(bt_menu);
-		p_east.add(p_east_north,BorderLayout.NORTH);
-		p_east.add(p_east_center,BorderLayout.CENTER);
 
-		//전체 영역
-		setLayout(new GridLayout(1,2));
-		add(p_east);
-		p_east.setBorder(new TitledBorder("상세 이용 내역"));
-		p_east.add(p_eChart);
-		add(p_west);
-		p_west.setBorder(new TitledBorder("이용 내역 분석"));
-		p_west.add(p_wChart);
+		JPanel p_north = new JPanel();
+		JPanel p_south = new JPanel();
+		setLayout(new BorderLayout());
+		add(p_north, BorderLayout.NORTH);
+		
+		p_north.add(bt_cal);  // 일별 통계 버튼
+		p_north.add(bt_menu); // 월별 통계 버튼
+		
+		add(p_south, BorderLayout.CENTER);
+		
+
+		p_south.setLayout(new GridLayout(1,2));
+		p_south.add(p_east);
+		p_south.add(p_west);
+		
 	}
-	
 	void eventProc() { //버튼 이벤트
 		ButtonEventHandler btnHandler = new ButtonEventHandler();
 		bt_cal.addActionListener(btnHandler);
@@ -87,9 +85,9 @@ public class AggView  extends JPanel {
 			try {
 				if(o==bt_cal){ 
 	//					JOptionPane.showMessageDialog(null,"엔터이벤트발생");
-					searchByTel();  //기간별 차트
+					searchByTel();  //일별 차트
 				} else if(o==bt_menu){
-					searchByTel2();  //품목별 차트
+					searchByTel2();  //월별 차트
 				} 
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, e.getMessage());
@@ -113,8 +111,8 @@ public class AggView  extends JPanel {
 				/**
 				 *  차트 종류 바꾸는 곳 
 				 */
-				p_eChart = PieChart();
-				p_wChart = BarChart();
+				p_eChart = BarChart2();
+				p_wChart = PieChart2();
 				/**
 				 *  차트 종류 바꾸는 곳 끝 
 				 */
@@ -135,7 +133,7 @@ public class AggView  extends JPanel {
 
 		}
 		
-		public void searchByTel2() throws Exception{ //품목별 차트
+		public void searchByTel2() throws Exception{ //일자별 차트
 			
 			// 2. Model의 전화번호 검색메소드 selectByTel()  호출
 			try {
@@ -151,8 +149,10 @@ public class AggView  extends JPanel {
 				/**
 				 *  차트 종류 바꾸는 곳 
 				 */
-				p_wChart = PieChart();
+				
 				p_eChart = BarChart();
+				p_wChart = PieChart();
+				
 				/**
 				 *  차트 종류 바꾸는 곳 끝 
 				 */
@@ -174,13 +174,13 @@ public class AggView  extends JPanel {
 		}
 	}
 
-	public JPanel PieChart() { 
-//		String sql = "SELECT m.menuname , sum(o.ocount) as ocount "
-		String sql = "SELECT m.menuname as name, sum(o.ocount) as value "
-		 + " FROM customer c "
-		 + " inner join order_cus o on c.ctel=o.ctel "
-		 + " inner join menu m on o.menuno = m.menuno "
-		 + " group by m.menuname ";
+	public JPanel PieChart() { //파이차트1. 5월 메뉴별 수량
+		
+		String sql = " SELECT M.MENUNAME AS name , COUNT(*) AS value "
+		+ " FROM (SELECT * FROM ORDER_CUS WHERE SUBSTR(OTIME,6,2)=to_char(sysdate,'mm')) O, MENU M "
+		+ " WHERE O.MENUNO = M.MENUNO " 
+		+ " GROUP BY M.MENUNAME ";
+				
 		     
 		PieChart chart = new PieChart();
 		
@@ -194,13 +194,69 @@ public class AggView  extends JPanel {
 		return chart.createPieChartPanel();
 	}
 	
-	public JPanel BarChart() { //월별 건수
-//		String sql = " SELECT substr(otime,1,5) AS MONTH, SUM(ocount) AS tot " +
-		String sql = " SELECT substr(otime,1,5) AS name, SUM(ocount) AS value " +
+	public JPanel BarChart() { //바차트1. 월별 주문 건수
+		String sql = " SELECT substr(otime,3,5) AS name, SUM(ocount) AS value " +
+				" FROM order_cus " + 
+				" GROUP BY substr(otime,3,5) " +
+				" ORDER BY substr(otime,3,5) ";
+		
+		BarChart chart = new BarChart();
+		
+		try {
+			chart.setTitle("이용내역분석");
+			chart.dbSql_Excute(sql);	
+		}catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+		return chart.createPieChartPanel();
+	}
+	
+
+	public JPanel PieChart2() { //파이차트2. 메뉴이름별 수량
+	
+		String sql = " SELECT M.MENUNAME AS name, COUNT(*) AS value "
+				+ " FROM (SELECT * FROM ORDER_CUS WHERE SUBSTR(OTIME,9,2)=to_char(sysdate,'dd')) O, MENU M "
+				+ " WHERE O.MENUNO = M.MENUNO "
+				+ " GROUP BY M.MENUNAME ";
+		     
+		PieChart chart = new PieChart();
+		
+		try {
+			chart.setTitle("이용내역분석");
+			chart.dbSql_Excute(sql);	
+		}catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+		return chart.createPieChartPanel();
+	}
+	
+	public JPanel BarChart2() { //바차트2. 일별 주문 건수
+		String sql = " SELECT substr(otime,3,8) AS name, SUM(ocount) AS value " +
 				" FROM order_cus " +
-			//	" WHERE otime BETWEEN '19/01/01' AND '19/12/01' " + 
-				" GROUP BY substr(otime,1,5) " +
-				" ORDER BY substr(otime,1,5) ";
+				" GROUP BY substr(otime,3,8) " +
+				" ORDER BY substr(otime,3,8) ";
+		
+		BarChart chart = new BarChart();
+		
+		try {
+			chart.setTitle("이용내역분석");
+			chart.dbSql_Excute(sql);	
+		}catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+		return chart.createPieChartPanel();
+	}
+	
+	public JPanel BarChart3() { //바차트3. 메뉴별 주문수량
+//		String sql = " SELECT substr(otime,3,8) AS MONTH, SUM(ocount) AS tot " +
+		String sql = " SELECT COUNT(*) AS VALUE , M.menuname AS NAME " 
+				+ " FROM order_cus o, menu M "
+				+ " WHERE o.menuno = M.menuno "
+				+ " GROUP BY menuname "
+				+ " ORDER BY COUNT(*) DESC";
 		
 		BarChart chart = new BarChart();
 		
@@ -215,4 +271,3 @@ public class AggView  extends JPanel {
 	}
 	
 }
-

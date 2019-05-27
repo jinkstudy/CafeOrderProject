@@ -56,8 +56,8 @@ public class OrderView extends JPanel {
 	OrderModel ord;
 	String[] mlist;
 	int[] j = new int[btMenu.length];
-
-
+	int mile_cnt = 0;
+	int cou_cnt = 0;
 
 	//#########################
 	//constructor method
@@ -120,8 +120,12 @@ public class OrderView extends JPanel {
 
 				// 콤보박스 선택 시,매장/테이크아웃 정보 읽어서 db로 보내주기.
 			}else if(o==bOrd) {
+				if(tfOrderTel.getText().contentEquals("")) {
+					JOptionPane.showMessageDialog(null, "전화번호를 입력하세요");
+				}else {
+					getSum();
+				}
 
-				getSum();
 				//System.out.println("주문이벤트확인");
 
 				// 취소 클릭 시 전체 취소
@@ -133,26 +137,46 @@ public class OrderView extends JPanel {
 				for (int i = 0; i < btMenu.length; i++) {
 					j[i]=0;
 				}
-				
-
 
 				//System.out.println("취소이벤트확인");
 
 				//마일리지 사용 시 전체 가격에서 차감, 고객 마일리지 차감	
 			}else if(o==bUsage) {
 				//System.out.println("사용이벤트");
+				
+				//한번만 적용되도록.
+				mile_cnt++;
+				if(mile_cnt == 1) {
+					minusMile();
+				}else if( mile_cnt > 1){
+					JOptionPane.showMessageDialog(null, "이미 적용되었습니다.");
+				}
+				
+				
 
 				// 쿠폰번호 적용 시 할인율 받아와서 가격 적용	
 			}else if(o==bApply) {
 				//System.out.println("적용이벤트확인");
-
+				cou_cnt++;
+				if(tfCupon.getText()=="") {
+					JOptionPane.showMessageDialog(null, "쿠폰번호를 확인하세요");
+				}
+				
+				if (cou_cnt == 1) {
+					getCoupon();
+				}else if( mile_cnt > 1){
+					JOptionPane.showMessageDialog(null, "이미 적용되었습니다.");
+				}
+				
+				
 				//결제금액 적용 시 최종 결제 가격 db전송 
 			}else if(o==bPay) {
 
 				OrderSelectedItem();
-				cancelSelect();
-				tfOrderTel.setText(null);
-
+				updateMile();
+				clearAll();
+				
+				
 				for (int i = 0; i < btMenu.length; i++) {
 					j[i]=0;
 				}
@@ -235,17 +259,6 @@ public class OrderView extends JPanel {
 		}
 
 
-
-		//		bPlatW = new JButton("플랫화이트");
-		//		bCarMa = new JButton("카라멜라테 마키아토");
-		//		bCarpu = new JButton("카푸치노");
-		//		bIceCarpu = new JButton("아이스 카푸치노");
-		//		bAmerica = new JButton("아메리카노");
-		//		bIceAmerica = new JButton("아이스 아메리카노");
-		//		bChoco = new JButton("초코치노");
-		//		bGreenTea = new JButton("그린티 라떼");
-		//		bSand = new JButton("샌드위치");
-
 		//버튼 나머지
 		bOrd = new JButton("주문");
 		bCan = new JButton("취소");
@@ -296,15 +309,7 @@ public class OrderView extends JPanel {
 		for (int i = 0; i < btMenu.length; i++) {
 			order_west_c.add(btMenu[i]);
 		}
-		//		order_west_c.add(bPlatW);
-		//		order_west_c.add(bCarMa);
-		//		order_west_c.add(bCarpu);
-		//		order_west_c.add(bIceCarpu);
-		//		order_west_c.add(bAmerica);
-		//		order_west_c.add(bIceAmerica);
-		//		order_west_c.add(bChoco);
-		//		order_west_c.add(bGreenTea);
-		//		order_west_c.add(bSand);
+
 		order_west.add(order_west_c, BorderLayout.CENTER);
 
 		//왼쪽 아래
@@ -392,6 +397,11 @@ public class OrderView extends JPanel {
 
 		ArrayList<Order> list = new ArrayList<Order>();
 
+
+		String cno = tfCupon.getText();
+
+		int totalPrice = Integer.parseInt(labelTotalWrite.getText());
+
 		try {
 			for (ArrayList<String> sub_list:Olist) {
 
@@ -400,6 +410,7 @@ public class OrderView extends JPanel {
 
 				or.setmOrderno(OrdernoFormat.format ( currentTime ));
 				or.setoTime(DateFormat.format ( currentTime));
+				//or.setoTime("2019.02.26 17:40:58");
 				or.setOtype((String)MorT.getSelectedItem());
 				or.setCtel(tfOrderTel.getText());
 				or.setMenuName(sub_list.get(0));
@@ -421,11 +432,12 @@ public class OrderView extends JPanel {
 
 
 
+
 			}
 
 			//System.out.println(list.get(1));
 
-			ord.insertOrList(list);
+			ord.insertOrList(list,cno,totalPrice);
 			ord.modifyMenuCnt(list);
 
 
@@ -479,10 +491,20 @@ public class OrderView extends JPanel {
 	// 선택 취소.
 	public void cancelSelect() {
 
-		Olist.clear();
-		tbModelOrder.data= Olist;
+		Olist.clear(); // 리스트 초기화.
+		tbModelOrder.data= Olist; // 화면 초기화
 		tbModelOrder.fireTableDataChanged();
+		labelTotalWrite.setText(null);
 
+	}
+	
+	public void clearAll() {
+		cancelSelect();
+		tfOrderTel.setText(null);
+		tfMiles.setText(null);
+		tfCupon.setText(null);
+		mile_cnt = 0;
+		cou_cnt = 0;
 	}
 
 	//db에서 전화번호 list를 받아와서 비교, 작업.
@@ -493,6 +515,7 @@ public class OrderView extends JPanel {
 
 			if(result[0]==0) {
 				joinCus();
+				cusInfo();
 			}
 			else {
 				tfMiles.setText(String.valueOf(result[1]));
@@ -516,20 +539,58 @@ public class OrderView extends JPanel {
 			e.printStackTrace();
 		}
 	}
+	// 마일리지 db에 업데이트
+	public void updateMile() {
+
+		String ctel=tfOrderTel.getText();
+		
+		int minus_mile = Integer.parseInt(tfMiles.getText()) ;
+		int plus_mile = Integer.parseInt(labelTotalWrite.getText()) /10;
+
+
+		try {
+			ord.upDateCusmile(plus_mile,minus_mile,ctel);
+			JOptionPane.showMessageDialog(null, plus_mile+"점이 추가 적립되었습니다." );
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "마일리지 적용 실패:" + e.getMessage() );
+		}
+
+	}
 	
-	
+	// 사용 마일리지 text에 반영
+	public void minusMile() {
+
+		int minus_mile = Integer.parseInt(tfMiles.getText()) ;
+		int price = Integer.parseInt(labelTotalWrite.getText());
+		labelTotalWrite.setText(String.valueOf(price-minus_mile));
+	}
+
+	public void getCoupon() {
+		String coupno = tfCupon.getText();
+		int total_price = Integer.parseInt(labelTotalWrite.getText());
+		try {
+			int percent = ord.getDiscount(coupno);
+			labelTotalWrite.setText(String.valueOf(total_price * (100-percent)/100));
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "쿠폰 적용 실패 : " + e.getMessage());
+
+		}
+	}
+
+	// 총 합산 가격 구하기.
 	public void getSum()
-    {
-        int sum = 0;
-        for(int i = 0; i < tableOrder.getRowCount(); i++)
-        {
-        String a =((String)(tableOrder.getValueAt(i, 2))).replaceAll("[^0-9]", "");
-            sum = sum + Integer.parseInt(a);
-        }
-        
-        labelTotalWrite.setText(Integer.toString(sum));
-    }
-	
+	{
+		int sum = 0;
+		for(int i = 0; i < tableOrder.getRowCount(); i++)
+		{
+			String a =((String)(tableOrder.getValueAt(i, 2))).replaceAll("[^0-9]", "");
+			sum = sum + Integer.parseInt(a);
+		}
+
+		labelTotalWrite.setText(Integer.toString(sum));
+	}
+
+	//테이블 모델.
 	class OrderTableModel extends AbstractTableModel{
 		ArrayList data = new ArrayList();
 

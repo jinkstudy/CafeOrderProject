@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -12,6 +13,8 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.PieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.title.Title;
@@ -80,6 +83,11 @@ public class PieChart {
 	   chart.getLegend().setItemFont(new Font("±¼¸²", Font.BOLD, 15));
 	   PiePlot plot = (PiePlot) chart.getPlot();
        plot.setLabelFont(new Font("±¼¸²", Font.BOLD, 15));
+       
+       plot.setSimpleLabels(true);
+       PieSectionLabelGenerator gen = new StandardPieSectionLabelGenerator(
+           "{0}: {1} ({2})", new DecimalFormat("0"), new DecimalFormat("0%"));
+       plot.setLabelGenerator(gen);
        
 	   return chart;
 	}

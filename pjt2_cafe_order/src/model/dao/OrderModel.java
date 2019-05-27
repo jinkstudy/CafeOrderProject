@@ -58,84 +58,7 @@ public class OrderModel implements OrderDao{
 
 		return mname;
 	}
-	//		public void insertOrder1(Order or) throws Exception {
-	//			Connection con = null;
-	//			PreparedStatement ps = null;
-	//			
-	//			try {
-	//				//2. Connection 연결객체 얻어오기
-	//				con = DriverManager.getConnection(url,user,pass);
-	//				
-	//				//3. sql 문장 만들기
-	//				String sql = "SELECT * FROM Customer WHERE Cmile=?";
-	//			
-	//				// 4. sql 전송객체 (PreparedStatement)
-	//				ps = con.prepareStatement(sql);
-	//				
-	//				ps.setInt(1, or.getMiles());
-	//				
-	//				//5.sql 전송
-	//				ps.executeQuery();
-	//			}finally {
-	//				//. 닫기
-	//				ps.close();
-	//				con.close();
-	//			}
-	//	}
-	//		
-	//		public void insertOrder2(Order or) throws Exception {
-	//	
-	//			Connection con = null;
-	//			PreparedStatement ps = null;
-	//			
-	//			try {
-	//				//2. Connection 연결객체 얻어오기
-	//				con = DriverManager.getConnection(url,user,pass);
-	//				
-	//				//3. sql 문장 만들기
-	//				String sql = "SELECT * FROM Coupon WHERE Cdiscount=?";
-	//			
-	//				// 4. sql 전송객체 (PreparedStatement)
-	//				ps = con.prepareStatement(sql);
-	//				
-	//				ps.setInt(1, or.getCdiscount());
-	//				
-	//				//5.sql 전송
-	//			 ps.executeQuery();
-	//			}finally {
-	//				//. 닫기
-	//				ps.close();
-	//				con.close();
-	//			}
-	//	}
-	//		
-	//		public void orderHwakin(Order or, int count) throws Exception {
-	//		
-	//			Connection con = null;
-	//			PreparedStatement ps = null;
-	//			try {
-	//				//2. Connection 연결객체 얻어오기
-	//				con = DriverManager.getConnection(url,user,pass);
-	//				
-	//				//3. sql 문장 만들기
-	//				String sql = "UPDATE menu SET MenuNO=?, MenuName=?, MPrice=?,Mcount=?";
-	//			
-	//				// 4. sql 전송객체 (PreparedStatement)
-	//				ps = con.prepareStatement(sql);
-	//				
-	//				ps.setInt(1, or.getMenuNo());
-	//				ps.setString(2, or.getMenuName());
-	//				ps.setInt(3, or.getMPrice());
-	//				ps.setInt(4,or.getMcount());
-	//				
-	//				//5.sql 전송
-	//				ps.executeUpdate();
-	//			}finally {
-	//				//. 닫기
-	//				ps.close();
-	//				con.close();
-	//				
-	//			}
+	
 
 	public int[] getInfoBytel(String tel) throws Exception{
 		con =DriverManager.getConnection(url,user,pass);
@@ -188,19 +111,22 @@ public class OrderModel implements OrderDao{
 
 	}
 
-	//r결제 선택 시 선택된 메뉴 주문 DB 및 결제 에 넣기
-	public void insertOrList(ArrayList<Order> list) throws Exception {
+	//결제 선택 시 선택된 메뉴 주문 DB 및 결제 에 넣기
+	public void insertOrList(ArrayList<Order> list,String cno,int totalPrice) throws Exception {
 
 		// 2. Connection 연결객체 얻어오기
 		Connection con = DriverManager.getConnection(url, user ,pass);
 		// 3. sql 문장 만들기
 		
 		//결제창에 주문번호 먼저 입력
-		String sql1 = "Insert into payment(oorderno) values(?)" ; 
+		String sql1 = "Insert into payment(oorderno,cno,totalprice) values(?,?,?)" ; 
 		PreparedStatement st1 = con.prepareStatement(sql1);
 		
 		
 		st1.setString(1,list.get(0).toString());
+		st1.setString(2,cno);
+		st1.setInt(3,totalPrice);
+		
 		st1.executeUpdate(); 
 		
 		String sql = "Insert into order_cus(ono,oorderno,otime,otype,ctel,menuno,ocount,ototalprice)"
@@ -305,11 +231,75 @@ public class OrderModel implements OrderDao{
 			//System.out.println(vo[i].getsOrderNo());
 			st.setInt(1, or.getmOcount());
 			st.setInt(2, or.getoMenuNo());
-			System.out.println(or.getoMenuNo() + "/" +or.getmSCount());
+			System.out.println(or.getoMenuNo() + "/" +or.getmOcount());
 			
 			
 			st.executeUpdate(); 
 		}
+		
+
+		st.close();
+		con.close();
+
+		
+	}
+	// 테이블에서 쿠폰 할인율 얻어오기
+	public int getDiscount(String couponNo) throws Exception {
+		
+				Connection	con = null;
+				PreparedStatement st= null;
+				ResultSet rs =null;
+				int percent =0;
+				// 2. 연결객체
+				con = DriverManager.getConnection(url, user ,pass);
+
+				//3. SQL
+				String sql = "select cdiscount from coupon where cno=?";
+
+				//4.전송객체
+				st = con.prepareStatement(sql);
+				st.setString(1,couponNo);
+				//5.전송
+				rs = st.executeQuery();
+				
+				//5.결과처리
+				if(rs.next()) {
+				percent = rs.getInt("cdiscount");
+					
+				}
+
+				//7. 닫기
+				rs.close();
+				st.close();
+				con.close();
+
+
+
+				return percent;
+		
+	}
+
+	
+	// 사용자 마일리지 데이터 반영하기
+	public void upDateCusmile(int plusmile, int minusmile,String ctel) throws Exception{
+		
+		// 2. Connection 연결객체 얻어오기
+		Connection con = DriverManager.getConnection(url, user ,pass);
+      // 3. sql 문장 만들기
+		
+		//마일리지 추가/ 차감.
+		String sql ="UPDATE customer SET cmile = cmile+?-?  WHERE ctel = ? ";
+	
+
+		PreparedStatement st = con.prepareStatement(sql);
+		
+	
+			st.setDouble(1, plusmile);
+			st.setInt(2, minusmile);
+			st.setString(3, ctel);
+			
+			st.executeUpdate(); 
+	
 		
 
 		st.close();
